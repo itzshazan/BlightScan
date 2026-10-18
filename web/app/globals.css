@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Colour: Greenhouse design system 2.0 (evergreen / mint / pecan / persimmon / periwinkle).
+  Type:   Harvest 2025 scale (Besley display, grotesk body, tight negative tracking).
+  Values are RGB channels so Tailwind can apply opacity.
+*/
+:root {
+  --page: 252 250 249;        /* pecan-200 */
+  --surface: 255 255 255;
+  --sunken: 245 238 235;      /* pecan-400 */
+  --ink: 21 55 44;            /* evergreen-800 */
+  --muted: 82 107 99;         /* evergreen-600 */
+  --line: 21 55 44;           /* used at /10–/15 */
+  --accent: 0 133 97;         /* mint-900 */
+  --accent-strong: 0 96 69;   /* mint-950 */
+  --accent-soft: 205 250 237; /* mint-400 */
+  --accent-tint: 242 255 251; /* mint-200 */
+  --deep: 3 28 23;            /* evergreen-900 */
+  --deep-ink: 230 255 248;    /* mint-300 */
+  --deep-muted: 161 180 173;  /* evergreen-300 */
+
+  --healthy: 0 112 79;        /* mint-925 */
+  --healthy-soft: 205 250 237;
+  --early: 184 95 24;         /* persimmon-800 */
+  --early-soft: 253 228 204;  /* persimmon-300 */
+  --late: 176 42 30;
+  --late-soft: 252 230 226;
+  --info: 67 72 232;          /* periwinkle-800 */
+  --info-soft: 238 243 255;   /* periwinkle-200 */
+}
+
+.dark {
+  --page: 3 28 23;
+  --surface: 10 41 33;
+  --sunken: 6 34 27;
+  --ink: 230 255 248;
+  --muted: 161 180 173;
+  --line: 205 250 237;
+  --accent: 71 192 153;       /* mint-700 */
+  --accent-strong: 123 246 209;
+  --accent-soft: 21 75 58;
+  --accent-tint: 12 52 41;
+  --deep: 0 16 13;
+  --healthy: 71 192 153;
+  --healthy-soft: 18 70 54;
+  --early: 247 177 109;
+  --early-soft: 74 46 20;
+  --late: 255 138 122;
+  --late-soft: 80 28 24;
+  --info: 163 187 254;
+  --info-soft: 30 36 84;
+  color-scheme: dark;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    @apply bg-page text-ink font-sans antialiased;
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
+  }
+  ::selection { background: rgb(var(--accent-soft)); color: rgb(var(--ink)); }
+  :focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; border-radius: 6px; }
+}
+
+@layer components {
+  /* Harvest: 70px / 1.1 / -2.8px */
+  .display-1 {
+    @apply font-serif font-normal;
+    font-size: clamp(2.6rem, 2rem + 3.4vw, 4.375rem);
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+  }
+  /* Harvest: 50px / 1.1 / -2px */
+  .display-2 {
+    @apply font-serif font-normal;
+    font-size: clamp(2rem, 1.6rem + 2vw, 3.125rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+  /* Harvest: 30px / 1.2 / -0.9px */
+  .display-3 {
+    @apply font-serif font-normal;
+    font-size: clamp(1.6rem, 1.4rem + 0.8vw, 1.875rem);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
+  /* Harvest card heading: 22px / 1.2 / -0.66px */
+  .title-card { font-size: 1.375rem; line-height: 1.2; letter-spacing: -0.03em; @apply font-medium; }
+  /* Harvest body-lg: 19px / 1.4 / -0.57px */
+  .lead { font-size: 1.1875rem; line-height: 1.45; letter-spacing: -0.03em; @apply text-muted; }
+  .eyebrow { @apply text-[13px] font-semibold uppercase text-accent; letter-spacing: 0.08em; }
+
+  .card { @apply rounded-card border border-line/10 bg-surface; }
+  .section { @apply py-20 md:py-28; }
+  .rule-h2 { @apply border-b border-line/15 pb-3 font-serif text-[1.75rem] leading-tight; letter-spacing: -0.03em; }
+
+  .field-input {
+    @apply h-12 w-full rounded-xl border border-line/20 bg-surface px-4 text-[15px] text-ink placeholder:text-muted/70
+      transition-colors hover:border-line/35 focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/15
+      disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  /* Keep browser autofill from painting fields light blue */
+  .field-input:-webkit-autofill,
+  .field-input:-webkit-autofill:hover,
+  .field-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: rgb(var(--ink));
+    -webkit-box-shadow: 0 0 0 1000px rgb(var(--surface)) inset;
+    caret-color: rgb(var(--ink));
+  }
+  .field-label { @apply mb-1.5 block text-sm font-medium text-ink; }
+  .field-error { @apply mt-1.5 text-sm text-late; }
+}
+
+/* First-screen elements the GSAP entrance reveals (components/motion/page-motion.tsx); keep in sync with it */
+.motion [data-motion] > section:first-child :is(.eyebrow, h1, .lead),
+.motion [data-intro] { visibility: hidden; }
+
+/* Leaflet sits under our sticky nav and drawers */
+.leaflet-container { font-family: var(--font-sans); z-index: 0; border-radius: inherit; }
+.leaflet-popup-content-wrapper { border-radius: 14px; }
+.leaflet-tile { filter: saturate(.75); }
+.dark .leaflet-tile { filter: brightness(.7) contrast(1.1) saturate(.6); }

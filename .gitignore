@@ -1,0 +1,21 @@
+# Secrets: keep real keys out of git. Templates (.env.example) are fine.
+.env
+.env.*
+!.env.example
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Python / ML service
+.venv/
+__pycache__/
+.pytest_cache/
+ml-service/model/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
