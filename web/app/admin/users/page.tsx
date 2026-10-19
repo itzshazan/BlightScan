@@ -50,11 +50,29 @@ export default function UsersPage() {
         />
       </div>
       <div className="card overflow-x-auto">
-        <table className="w-full min-w-[760px] text-left text-[15px]">
+        {/* Fixed layout so columns keep the same widths whatever the content; long names/emails truncate */}
+        <table className="w-full min-w-[760px] table-fixed text-left text-[15px]">
+          <colgroup>
+            <col className="w-[24%]" />
+            <col className="w-[28%]" />
+            <col className="w-[11%]" />
+            <col className="w-[8%]" />
+            <col className="w-[13%]" />
+            <col className="w-[11%]" />
+            <col className="w-16" />
+          </colgroup>
           <thead className="border-b border-line/10 text-sm text-muted">
             <tr>
-              {["Name", "Email", "Role", "Scans", "Joined", "Status", ""].map((h) => (
-                <th key={h} className="p-4 font-medium">
+              {[
+                ["Name", ""],
+                ["Email", ""],
+                ["Role", ""],
+                ["Scans", "text-center"],
+                ["Joined", ""],
+                ["Status", ""],
+                ["", ""],
+              ].map(([h, align], i) => (
+                <th key={i} className={`p-4 font-medium ${align}`}>
                   {h}
                 </th>
               ))}
@@ -64,18 +82,23 @@ export default function UsersPage() {
             {pageRows.map((u) => (
               <tr key={u.id}>
                 <td className="p-4">
-                  <span className="flex items-center gap-3 font-medium">
-                    <Avatar name={u.full_name} className="h-9 w-9 text-xs" /> {u.full_name}
+                  <span className="flex min-w-0 items-center gap-3 font-medium">
+                    <Avatar name={u.full_name} className="h-9 w-9 shrink-0 text-xs" />
+                    <span className="truncate" title={u.full_name}>
+                      {u.full_name}
+                    </span>
                   </span>
                 </td>
-                <td className="p-4 text-muted">{u.email}</td>
+                <td className="truncate p-4 text-muted" title={u.email}>
+                  {u.email}
+                </td>
                 <td className="p-4">
                   <Badge tone={roleTone[u.role]} className="capitalize">
                     {u.role}
                   </Badge>
                 </td>
-                <td className="p-4">{u.id === db.profile.id && !db.staff ? db.scans.length : u.scans}</td>
-                <td className="p-4 text-muted">{formatDate(u.created_at)}</td>
+                <td className="p-4 text-center tabular-nums">{u.id === db.profile.id && !db.staff ? db.scans.length : u.scans}</td>
+                <td className="whitespace-nowrap p-4 text-muted">{formatDate(u.created_at)}</td>
                 <td className="p-4">
                   <Badge dot tone={u.status === "active" ? "bg-healthy-soft text-healthy" : "bg-ink/5 text-muted"} className="capitalize">
                     {u.status}
@@ -83,7 +106,7 @@ export default function UsersPage() {
                 </td>
                 <td className="p-4 text-right">
                   <Menu>
-                    <MenuTrigger className="grid h-9 w-9 place-items-center rounded-full hover:bg-ink/5" aria-label={`Actions for ${u.full_name}`}>
+                    <MenuTrigger className="ml-auto grid h-9 w-9 place-items-center rounded-full hover:bg-ink/5" aria-label={`Actions for ${u.full_name}`}>
                       <MoreHorizontal className="h-4 w-4" />
                     </MenuTrigger>
                     <MenuContent>
