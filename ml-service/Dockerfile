@@ -1,4 +1,5 @@
-FROM python:3.11-slim
+# 3.12+: numpy 2.5 in requirements.txt has no wheels for older Pythons
+FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PORT=7860
 WORKDIR /app
