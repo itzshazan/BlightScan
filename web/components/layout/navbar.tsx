@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Menu as MenuIcon, Plus, X } from "lucide-react";
 import { Logo } from "./logo";
 import { ThemeToggle } from "./theme-toggle";
@@ -99,7 +100,9 @@ export function Navbar({ app = false }: { app?: boolean }) {
         </div>
       </div>
 
-      {open && (
+      {/* Portalled to <body>: the header's backdrop-blur makes it the containing block for fixed children,
+          which would shrink this overlay to the header's 72px height. */}
+      {open && createPortal(
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
           <button className="absolute inset-0 bg-deep/40" aria-label="Close menu" onClick={() => setOpen(false)} />
           <div className="absolute inset-y-0 right-0 flex w-[min(360px,88vw)] animate-slide-in flex-col bg-page p-5">
@@ -138,7 +141,8 @@ export function Navbar({ app = false }: { app?: boolean }) {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );
