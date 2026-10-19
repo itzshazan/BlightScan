@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Input, Select } from "@/components/ui/field";
 import { EmptyState, PageHeader, Skeleton } from "@/components/ui/misc";
-import { LABELS, formatDate } from "@/lib/format";
+import { LABELS, affectedArea, formatDate } from "@/lib/format";
 import { deleteScans, effectiveLabel, useDB } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { supabaseEnabled } from "@/lib/supabase/env";
@@ -23,10 +23,10 @@ const VIEWS = [
 ] as const;
 
 function toCSV(rows: Scan[], fields: Field[]) {
-  const head = ["id", "date", "result", "model_label", "confidence", "severity", "field", "review_status", "notes"];
+  const head = ["id", "date", "result", "model_label", "confidence", "severity", "diseased_area_pct", "field", "review_status", "notes"];
   const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const lines = rows.map((s) =>
-    [s.id, s.created_at, LABELS[effectiveLabel(s)], LABELS[s.predicted_label], s.confidence, s.severity, fields.find((f) => f.id === s.field_id)?.name ?? "", s.review_status, s.notes]
+    [s.id, s.created_at, LABELS[effectiveLabel(s)], LABELS[s.predicted_label], s.confidence, s.severity, affectedArea(s), fields.find((f) => f.id === s.field_id)?.name ?? "", s.review_status, s.notes]
       .map(esc)
       .join(",")
   );

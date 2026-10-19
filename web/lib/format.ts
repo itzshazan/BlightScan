@@ -1,4 +1,4 @@
-import type { DiseaseLabel, RiskLevel } from "./types";
+import type { DiseaseLabel, RiskLevel, Scan } from "./types";
 
 export const LABELS: Record<DiseaseLabel, string> = {
   healthy: "Healthy",
@@ -13,6 +13,11 @@ export const RISK_MESSAGES: Record<RiskLevel, string> = {
   medium: "Spread possible. Inspect nearby plants within 3 days.",
   high: "High risk of spread. Remove infected leaves and treat now.",
 };
+
+/** Measured diseased leaf area, e.g. 23.5; null when there's no trustworthy measurement. */
+export function affectedArea(scan: Pick<Scan, "diseased_area" | "severity_reliable">): number | null {
+  return scan.severity_reliable && scan.diseased_area != null ? Number(scan.diseased_area) : null;
+}
 
 export function formatDate(iso: string | null | undefined, opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", year: "numeric" }) {
   if (!iso) return "—";

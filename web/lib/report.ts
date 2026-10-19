@@ -1,6 +1,6 @@
 "use client";
 // Download Report (PDF), generated client-side with jsPDF (spec 4.9).
-import { LABELS, RISK_LABELS, formatDateTime } from "./format";
+import { LABELS, RISK_LABELS, affectedArea, formatDateTime } from "./format";
 import { getByLabel } from "./diseases";
 import type { DiseaseLabel, Field, Scan, SpreadPrediction } from "./types";
 
@@ -63,7 +63,7 @@ export async function downloadScanReport({ scan, field, spread, label }: ReportI
   doc.setFontSize(11);
   const lines = [
     `Confidence: ${scan.confidence}%`,
-    `Severity: ${scan.severity}`,
+    `Severity: ${scan.severity}${affectedArea(scan) != null ? ` (about ${affectedArea(scan)}% of the leaf affected)` : ""}`,
     `Field: ${field?.name ?? "No field"}`,
     `Model: ${scan.model_version}`,
     ...(Object.entries(scan.probabilities) as [DiseaseLabel, number][]).map(([k, v]) => `${LABELS[k]}: ${(v * 100).toFixed(1)}%`),

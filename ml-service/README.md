@@ -47,17 +47,32 @@ python -m venv .venv
 pip install -r requirements-dev.txt
 python scripts/download_model.py  # add --mobilenet for the fallback model
 uvicorn app.main:app --port 7860
-pytest                            # 11 tests
+pytest                            # 21 tests
 ```
 
 `.env` holds `ML_API_KEY`. It must match `ML_API_KEY` in `web/.env.local`.
+
+## Severity (diseased leaf area)
+
+`app/severity.py` measures the share of the leaf with lesions from leaf colour, following the ImageJ procedure in Dhar et al. (2025), *Results in Engineering* 28, 107739: segment the leaf, clean it with erosion/dilation, mark yellow, brown, dark and grey tissue inside it, divide by the leaf area. The bands are the paper's: under 25 % low, 25–50 % moderate, over 50 % high. `/predict` returns `diseased_area`, a `lesion_mask` PNG for the result page, and `severity_reliable`, which is false for busy backgrounds or photos that fail the single-leaf check; severity then falls back to moderate.
+
+## Evaluate
+
+```bash
+python scripts/download_model.py --mobilenet --dir model-mobilenet   # second model to compare against
+python scripts/fetch_eval_data.py                                    # 262 PlantDoc field + 450 PlantVillage lab photos
+python scripts/evaluate.py --model dinov2=model --model mobilenet=model-mobilenet \
+    --data plantdoc=eval-data/plantdoc --data plantvillage=eval-data/plantvillage
+```
+
+Writes accuracy, precision/recall/F1, confusion matrices, warning rates, inference time and McNemar's test for each model pair to [eval/RESULTS.md](eval/RESULTS.md) and `eval/results.json`. The website's figures (`web/lib/site.ts`, `evaluation`) come from that file.
 
 ## Endpoints
 
 | Method | Path | Body | Returns |
 | --- | --- | --- | --- |
 | GET | `/health` | none | `{status, model_version, ood_check}` |
-| POST | `/predict` | `{"image_url": "<signed URL>"}` or multipart `file` | `{label, confidence, probabilities, severity, model_version, inference_ms, in_domain, note, top_class, …}` |
+| POST | `/predict` | `{"image_url": "<signed URL>"}` or multipart `file` | `{label, confidence, probabilities, severity, diseased_area, severity_reliable, lesion_mask, model_version, inference_ms, in_domain, note, top_class, …}` |
 | POST | `/predict-spread` | `{disease, latitude, longitude, severity, recent_cases}` | `{risk_level, risk_score, forecast[7], weather[7], summary}` |
 
 `/predict-spread` fetches hourly weather from Open-Meteo and applies spec section 7. `web/lib/spread.ts` is the same algorithm for demo mode; keep them in sync.

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Crumbs, Skeleton } from "@/components/ui/misc";
 import { getByLabel } from "@/lib/diseases";
-import { LABELS, formatDateTime } from "@/lib/format";
+import { LABELS, affectedArea, formatDateTime } from "@/lib/format";
 import { deleteScans, effectiveLabel, reviewScan, scanSpread, useDB } from "@/lib/store";
 import { ScanConditions } from "@/components/app/scan-conditions";
 import { downloadScanReport } from "@/lib/report";
@@ -26,6 +26,7 @@ export default function ScanResultPage({ params }: { params: { id: string } }) {
   const db = useDB();
   const router = useRouter();
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [showMask, setShowMask] = useState(true);
 
   if (!db)
     return (
@@ -45,6 +46,8 @@ export default function ScanResultPage({ params }: { params: { id: string } }) {
   const spread = diseased ? scanSpread(db, scan) : null;
   const low = scan.confidence < 60;
   const severity = { low: "Low", moderate: "Moderate", high: "High" }[scan.severity];
+  const area = diseased ? affectedArea(scan) : null;
+  const mask = area != null ? scan.lesion_mask : null;
 
   return (
     <>
@@ -59,8 +62,24 @@ export default function ScanResultPage({ params }: { params: { id: string } }) {
       <div className="space-y-6">
         {/* 1 · Diagnosis card */}
         <section className="card grid overflow-hidden md:grid-cols-[minmax(0,360px)_1fr]">
-          <div className="aspect-square bg-sunken md:aspect-auto md:min-h-[360px]">
+          <div className="relative aspect-square bg-sunken md:aspect-auto md:min-h-[360px]">
             <ScanImage scan={scan} />
+            {/* The mask has the photo's framing, so object-cover crops both the same way */}
+            {mask && showMask && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={mask} alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+            )}
+            {mask && (
+              <button
+                type="button"
+                onClick={() => setShowMask((v) => !v)}
+                aria-pressed={showMask}
+                className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-deep/80 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm hover:bg-deep"
+              >
+                <span className={`h-2.5 w-2.5 rounded-full ${showMask ? "bg-[#e11d48]" : "border border-white/70"}`} />
+                {showMask ? "Hide affected area" : "Show affected area"}
+              </button>
+            )}
           </div>
           <div className="flex flex-col p-6 md:p-8">
             <p className="text-sm text-muted">{scan.expert_label ? "Expert-reviewed diagnosis" : "Model diagnosis"}</p>
@@ -78,16 +97,26 @@ export default function ScanResultPage({ params }: { params: { id: string } }) {
 
             <dl className="mt-8 grid grid-cols-3 gap-3 text-sm">
               {[
-                ["Severity", diseased ? severity : "None"],
-                ["Date", new Date(scan.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })],
-                ["Field", field?.name ?? "—"],
-              ].map(([k, v]) => (
+                ["Severity", diseased ? severity : "None", area != null ? `${area}% of leaf` : null],
+                ["Date", new Date(scan.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" }), null],
+                ["Field", field?.name ?? "—", null],
+              ].map(([k, v, sub]) => (
                 <div key={k} className="rounded-2xl bg-sunken p-3">
                   <dt className="text-muted">{k}</dt>
                   <dd className="mt-1 truncate font-semibold">{v}</dd>
+                  {sub && <dd className="truncate text-xs text-muted">{sub}</dd>}
                 </div>
               ))}
             </dl>
+
+            {/* Severity method: older scans (before leaf-area measurement) have no diseased_area and get no note */}
+            {diseased && scan.diseased_area !== undefined && scan.diseased_area !== null && (
+              <p className="mt-3 text-xs leading-relaxed text-muted">
+                {area != null
+                  ? `About ${area}% of the leaf shows lesions, measured from leaf colour. Severity bands: under 25% low, 25–50% moderate, over 50% high.`
+                  : "We couldn't measure the affected area on this photo, so severity is set to moderate. For a measurement, photograph one leaf against a plain background."}
+              </p>
+            )}
 
             {/* 3 · Low confidence, plus the model's reason when it has one */}
             {(low || scan.model_note) && (

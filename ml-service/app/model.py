@@ -7,6 +7,8 @@ Late Blight for tomato, so:
   * confidence is the softmax probability of the chosen class, so a leaf that looks like another
     disease gets a low confidence and the app shows its "we're not sure" warning,
   * a note explains why when the photo looks like something BlightScan doesn't cover.
+
+Severity comes from the diseased leaf area (severity.py), not from the classifier.
 """
 
 import json
@@ -18,6 +20,8 @@ from pathlib import Path
 import numpy as np
 import onnxruntime as ort
 from PIL import Image, ImageOps
+
+from .severity import estimate, grade
 
 CLASSES = ("healthy", "early_blight", "late_blight")
 
@@ -41,11 +45,15 @@ def pretty_label(raw: str) -> str:
     return raw
 
 
-def severity_for(label: str, confidence: float) -> str:
-    # Spec 6.1 placeholder rule; replace with a lesion-area estimate if segmentation is added.
+def severity_for(label: str, area: dict, in_domain: bool) -> tuple[str, bool]:
+    """Severity band from the diseased leaf area, and whether that measurement can be trusted.
+
+    Without a trustworthy measurement a diseased leaf gets "moderate", the spread model's neutral default.
+    """
+    reliable = in_domain and area["severity_reliable"] and area["diseased_area"] is not None
     if label == "healthy":
-        return "low"
-    return "high" if confidence > 85 else "moderate"
+        return "low", reliable
+    return (grade(area["diseased_area"]) if reliable else "moderate"), reliable
 
 
 @dataclass
@@ -150,11 +158,19 @@ class LeafModel:
             else:
                 note = f"This looks most like {pretty_label(top_label)} ({p[top] * 100:.0f}%). Is it a tomato leaf?"
 
+        area = estimate(img)
+        severity, severity_reliable = severity_for(label, area, in_domain)
+
         return {
             "label": label,
             "confidence": confidence,
             "probabilities": {**{c: round(v, 4) for c, v in probs.items()}, "other": round(max(0.0, 1 - sum(probs.values())), 4)},
-            "severity": severity_for(label, confidence),
+            "severity": severity,
+            # % of the leaf with lesions and a transparent PNG marking them (same framing as the photo).
+            # Only trust them when severity_reliable: one leaf on a plain background.
+            "diseased_area": area["diseased_area"],
+            "severity_reliable": severity_reliable,
+            "lesion_mask": area["lesion_mask"],
             "model_version": self.version,
             "inference_ms": int((time.perf_counter() - t0) * 1000),
             "in_domain": in_domain,

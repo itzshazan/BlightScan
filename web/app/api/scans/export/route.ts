@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { affectedArea } from "@/lib/format";
 import { fail, requireUser } from "@/lib/server/session";
 
 const LABEL: Record<string, string> = { healthy: "Healthy", early_blight: "Early Blight", late_blight: "Late Blight" };
@@ -13,7 +14,8 @@ export async function GET(req: Request) {
 
   let q = s.supabase
     .from("scans")
-    .select("id, created_at, predicted_label, expert_label, confidence, severity, review_status, notes, field_id, fields(name)")
+    // "*" rather than a column list so this keeps working on databases without migration 0006
+    .select("*, fields(name)")
     .eq("user_id", s.user.id);
   const field = p.get("field");
   if (field === "none") q = q.is("field_id", null);
@@ -34,10 +36,10 @@ export async function GET(req: Request) {
     return !result || label === result;
   });
 
-  const head = ["id", "date", "result", "model_label", "confidence", "severity", "field", "review_status", "notes"];
+  const head = ["id", "date", "result", "model_label", "confidence", "severity", "diseased_area_pct", "field", "review_status", "notes"];
   const lines = rows.map((r) => {
     const f = r.fields as unknown as { name: string } | null;
-    return [r.id, r.created_at, LABEL[r.expert_label ?? r.predicted_label], LABEL[r.predicted_label], r.confidence, r.severity, f?.name ?? "", r.review_status, r.notes]
+    return [r.id, r.created_at, LABEL[r.expert_label ?? r.predicted_label], LABEL[r.predicted_label], r.confidence, r.severity, affectedArea(r), f?.name ?? "", r.review_status, r.notes]
       .map(esc)
       .join(",");
   });

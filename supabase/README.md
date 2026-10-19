@@ -1,6 +1,6 @@
 # Supabase setup
 
-Five migrations, run in order. They contain the schema, Row Level Security, storage buckets and seed data.
+Six migrations, run in order. They contain the schema, Row Level Security, storage buckets and seed data.
 
 | File | What it does |
 | --- | --- |
@@ -9,11 +9,12 @@ Five migrations, run in order. They contain the schema, Row Level Security, stor
 | `0003_storage.sql` | `leaf-images` (private), `avatars` and `disease-images` (public) buckets and their policies |
 | `0004_seed.sql` | Model versions and the two disease library rows. Generated, see below. |
 | `0005_scan_weather.sql` | Location and live weather on each scan; spread forecasts for scans without a field |
+| `0006_scan_lesion_area.sql` | Diseased leaf area, its reliability and the lesion mask on each scan |
 
 ## 1. Create the project
 
 1. Create a project at supabase.com. The free tier is enough.
-2. Open **SQL Editor** and run the five files in order. With the Supabase CLI you can run `supabase link` and then `supabase db push` instead.
+2. Open **SQL Editor** and run the six files in order. With the Supabase CLI you can run `supabase link` and then `supabase db push` instead.
 3. Open **Project Settings → API** and copy the values into `web/.env.local`:
    - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
    - `anon` public key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`

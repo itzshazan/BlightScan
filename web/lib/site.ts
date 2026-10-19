@@ -35,3 +35,11 @@ export const model = {
   metrics: { accuracy: 98.7 as number | null, f1: 98.1 as number | null },
   avgResponseMs: null as number | null, // TODO: measure after deploying (photo upload → result)
 };
+
+// Our own test of the served model and the MobileNetV2 fallback, 3 classes as the app reports them.
+// From ml-service/eval/results.json (scripts/evaluate.py); re-run it and update these if the model changes.
+export const evaluation = {
+  resultsUrl: "https://github.com/itzshazan/BlightScan/blob/main/ml-service/eval/RESULTS.md",
+  lab: { name: "PlantVillage lab photos", n: 450, accuracy: 99.1, f1: 0.991, warned: 7.1, accuracyNotWarned: 100.0, fallbackAccuracy: 97.8, mcnemarP: 0.18 },
+  field: { name: "PlantDoc field photos", n: 262, accuracy: 57.6, f1: 0.494, warned: 90.5, accuracyNotWarned: 84.0, fallbackAccuracy: 63.7, mcnemarP: 0.114 },
+};

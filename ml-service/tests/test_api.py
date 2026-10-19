@@ -46,8 +46,10 @@ def test_predict_multipart_shape(client):
     assert 0 <= body["confidence"] <= 100
     assert set(body["probabilities"]) == {"healthy", "early_blight", "late_blight", "other"}
     assert body["severity"] in {"low", "moderate", "high"}
-    # A flat green rectangle is not a leaf photo.
+    assert {"diseased_area", "severity_reliable", "lesion_mask"} <= set(body)
+    # A flat green rectangle is not a leaf photo, so its leaf-area measurement isn't trusted either.
     assert body["in_domain"] is False
+    assert body["severity_reliable"] is False
     assert body["note"]
 
 

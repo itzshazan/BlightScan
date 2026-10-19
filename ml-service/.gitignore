@@ -4,3 +4,5 @@ __pycache__/
 .env
 model/
 .env
+model-*/
+eval-data/

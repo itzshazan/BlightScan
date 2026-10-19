@@ -6,6 +6,9 @@ export interface MlPrediction {
   confidence: number;
   probabilities: Record<DiseaseLabel | "other", number>;
   severity: Severity;
+  diseased_area: number | null;
+  severity_reliable: boolean;
+  lesion_mask: string | null;
   model_version: string;
   inference_ms: number;
   in_domain: boolean;

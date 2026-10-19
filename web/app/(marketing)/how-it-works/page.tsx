@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowLeft, ArrowRight, CloudSun, Cpu, Database, ImageUp, Map, MapPin, Scaling } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ScanCTA } from "@/components/auth-cta";
-import { model } from "@/lib/site";
+import { evaluation, model } from "@/lib/site";
 
 export const metadata = { title: "How It Works" };
 
@@ -10,7 +10,7 @@ type PipelineNode = { icon: LucideIcon; t: string; s: string };
 const row1: PipelineNode[] = [
   { icon: ImageUp, t: "Upload leaf", s: "Phone camera or file, compressed to 1024 px" },
   { icon: Scaling, t: "Preprocess", s: "Fix rotation, resize to 256, centre-crop 224, normalise" },
-  { icon: Cpu, t: "Model predict", s: "38 PlantVillage classes narrowed to 3, with confidence" },
+  { icon: Cpu, t: "Model predict", s: "38 PlantVillage classes narrowed to 3, with confidence and % of leaf affected" },
   { icon: Database, t: "Save prediction", s: "Stored in your private scan history" },
 ];
 const row2: PipelineNode[] = [
@@ -146,6 +146,10 @@ export default function HowItWorksPage() {
                 ["Runtime", model.runtime],
                 ["Input", model.inputSize],
                 ["Classes used", "Healthy, Early blight, Late blight (of 38)"],
+                [
+                  "Severity",
+                  "Share of the leaf with lesions, measured from leaf colour as in Dhar et al. (2025): under 25% low, 25–50% moderate, over 50% high. Only shown for one leaf on a plain background.",
+                ],
                 ["Licence", model.license],
               ].map(([k, v]) => (
                 <div key={k} className="grid grid-cols-[8.5rem_1fr] gap-4 border-t border-line/15 py-3.5 text-[15px]">
@@ -185,6 +189,52 @@ export default function HowItWorksPage() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* Our own evaluation: lab vs field, ruled comparison table */}
+      <section className="section">
+        <div className="container grid gap-14 lg:grid-cols-[1fr_1.25fr] lg:gap-24">
+          <div>
+            <p className="eyebrow">Our own test</p>
+            <h2 className="display-2 mt-6">Checked on {evaluation.lab.n + evaluation.field.n} photos, lab and field</h2>
+            <p className="mt-5 max-w-[46ch] text-[17px] text-muted">
+              We ran the model on {evaluation.lab.n} PlantVillage lab photos and {evaluation.field.n} real field photos from PlantDoc, which it never trained on. On lab photos it
+              matches the author&apos;s figure. On field photos accuracy drops sharply, so BlightScan warns whenever a photo doesn&apos;t look like a single leaf.
+            </p>
+            <a href={evaluation.resultsUrl} target="_blank" rel="noreferrer" className="mt-8 inline-block font-medium text-accent hover:underline">
+              Full results and confusion matrices ↗
+            </a>
+          </div>
+          <div>
+            <table className="w-full border-b border-line/15 text-left text-sm sm:text-[15px]">
+              <thead>
+                <tr className="text-sm text-muted">
+                  <th className="py-3 pr-4 font-medium" />
+                  <th className="py-3 pr-4 font-medium">Lab photos</th>
+                  <th className="py-3 font-medium">Field photos</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["Accuracy", `${evaluation.lab.accuracy}%`, `${evaluation.field.accuracy}%`],
+                  ["Macro F1", evaluation.lab.f1.toFixed(3), evaluation.field.f1.toFixed(3)],
+                  ["Shown with a “not sure” warning", `${evaluation.lab.warned}%`, `${evaluation.field.warned}%`],
+                  ["Accuracy when not warned", `${evaluation.lab.accuracyNotWarned}%`, `${evaluation.field.accuracyNotWarned}%`],
+                  ["MobileNetV2 fallback accuracy", `${evaluation.lab.fallbackAccuracy}%`, `${evaluation.field.fallbackAccuracy}%`],
+                  ["McNemar test, model vs fallback", `p = ${evaluation.lab.mcnemarP}, not significant`, `p = ${evaluation.field.mcnemarP}, not significant`],
+                ].map(([k, lab, field]) => (
+                  <tr key={k} className="border-t border-line/15 align-top">
+                    <th scope="row" className="py-3.5 pr-4 font-normal text-muted">
+                      {k}
+                    </th>
+                    <td className="py-3.5 pr-4">{lab}</td>
+                    <td className="py-3.5">{field}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 

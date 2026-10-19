@@ -45,6 +45,9 @@ export interface Scan {
   confidence: number;
   probabilities: Record<DiseaseLabel, number>;
   severity: Severity;
+  diseased_area?: number | null; // % of the leaf with lesions (colour-based estimate)
+  severity_reliable?: boolean | null; // false: busy background or not one leaf, so the area is rough
+  lesion_mask?: string | null; // transparent PNG data URL marking lesions, same framing as the photo
   notes?: string;
   model_version: string;
   model_note?: string | null; // why the model is unsure, e.g. "looks most like Septoria leaf spot"

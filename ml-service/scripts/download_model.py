@@ -50,19 +50,21 @@ def download(url: str, dest: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mobilenet", action="store_true", help="use the MobileNetV2 fallback model")
+    parser.add_argument("--dir", type=Path, default=MODEL_DIR, help="where to put the files (default: model/, which the service loads)")
     args = parser.parse_args()
     choice = MOBILENET if args.mobilenet else DINOV2
+    out = args.dir.resolve()
 
-    if MODEL_DIR.exists():
-        shutil.rmtree(MODEL_DIR)
-    MODEL_DIR.mkdir(parents=True)
+    if out.exists():
+        shutil.rmtree(out)
+    out.mkdir(parents=True)
 
     print(f"Downloading {choice['name']}")
     for name, url in choice["files"].items():
         print(f"  {name} ...", end=" ", flush=True)
-        download(url, MODEL_DIR / name)
-        print(f"{(MODEL_DIR / name).stat().st_size / 1e6:.1f} MB")
-    print(f"Done: {MODEL_DIR}")
+        download(url, out / name)
+        print(f"{(out / name).stat().st_size / 1e6:.1f} MB")
+    print(f"Done: {out}")
     return 0
 
 

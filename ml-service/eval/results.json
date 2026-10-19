@@ -1,0 +1,261 @@
+{
+  "date": "2026-10-19",
+  "datasets": {
+    "plantdoc": {
+      "n": 262,
+      "counts": {
+        "healthy": 63,
+        "early_blight": 88,
+        "late_blight": 111
+      },
+      "models": {
+        "dinov2": {
+          "n": 262,
+          "accuracy": 0.5763358778625954,
+          "macro_precision": 0.7348326027571309,
+          "macro_recall": 0.5068770068770069,
+          "macro_f1": 0.49369158458189655,
+          "per_class": {
+            "healthy": {
+              "precision": 1.0,
+              "recall": 0.1746031746031746,
+              "f1": 0.29729729729729726,
+              "support": 63
+            },
+            "early_blight": {
+              "precision": 0.6792452830188679,
+              "recall": 0.4090909090909091,
+              "f1": 0.5106382978723405,
+              "support": 88
+            },
+            "late_blight": {
+              "precision": 0.5252525252525253,
+              "recall": 0.9369369369369369,
+              "f1": 0.6731391585760519,
+              "support": 111
+            }
+          },
+          "confusion_matrix": {
+            "labels": [
+              "healthy",
+              "early_blight",
+              "late_blight"
+            ],
+            "rows_true_cols_pred": [
+              [
+                11,
+                10,
+                42
+              ],
+              [
+                0,
+                36,
+                52
+              ],
+              [
+                0,
+                7,
+                104
+              ]
+            ]
+          },
+          "warned_share": 0.9045801526717557,
+          "accuracy_when_not_warned": 0.84,
+          "model_ms_median": 85.47740001813509
+        },
+        "mobilenet": {
+          "n": 262,
+          "accuracy": 0.6374045801526718,
+          "macro_precision": 0.7107683982683982,
+          "macro_recall": 0.5998482248482249,
+          "macro_f1": 0.6033481007465747,
+          "per_class": {
+            "healthy": {
+              "precision": 0.9090909090909091,
+              "recall": 0.31746031746031744,
+              "f1": 0.4705882352941177,
+              "support": 63
+            },
+            "early_blight": {
+              "precision": 0.5982142857142857,
+              "recall": 0.7613636363636364,
+              "f1": 0.6699999999999999,
+              "support": 88
+            },
+            "late_blight": {
+              "precision": 0.625,
+              "recall": 0.7207207207207207,
+              "f1": 0.6694560669456067,
+              "support": 111
+            }
+          },
+          "confusion_matrix": {
+            "labels": [
+              "healthy",
+              "early_blight",
+              "late_blight"
+            ],
+            "rows_true_cols_pred": [
+              [
+                20,
+                15,
+                28
+              ],
+              [
+                1,
+                67,
+                20
+              ],
+              [
+                1,
+                30,
+                80
+              ]
+            ]
+          },
+          "warned_share": 0.7251908396946565,
+          "accuracy_when_not_warned": 0.7361111111111112,
+          "model_ms_median": 4.926749970763922
+        }
+      },
+      "mcnemar": {
+        "dinov2 vs mobilenet": {
+          "only_first_correct": 37,
+          "only_second_correct": 53,
+          "chi2": 2.5,
+          "p_value": 0.11384629800665803,
+          "method": "chi-square, continuity corrected",
+          "significant": false
+        }
+      }
+    },
+    "plantvillage": {
+      "n": 450,
+      "counts": {
+        "healthy": 150,
+        "early_blight": 150,
+        "late_blight": 150
+      },
+      "models": {
+        "dinov2": {
+          "n": 450,
+          "accuracy": 0.9911111111111112,
+          "macro_precision": 0.9912135471128152,
+          "macro_recall": 0.991111111111111,
+          "macro_f1": 0.9911105658833982,
+          "per_class": {
+            "healthy": {
+              "precision": 0.9933774834437086,
+              "recall": 1.0,
+              "f1": 0.9966777408637874,
+              "support": 150
+            },
+            "early_blight": {
+              "precision": 1.0,
+              "recall": 0.98,
+              "f1": 0.98989898989899,
+              "support": 150
+            },
+            "late_blight": {
+              "precision": 0.9802631578947368,
+              "recall": 0.9933333333333333,
+              "f1": 0.9867549668874172,
+              "support": 150
+            }
+          },
+          "confusion_matrix": {
+            "labels": [
+              "healthy",
+              "early_blight",
+              "late_blight"
+            ],
+            "rows_true_cols_pred": [
+              [
+                150,
+                0,
+                0
+              ],
+              [
+                0,
+                147,
+                3
+              ],
+              [
+                1,
+                0,
+                149
+              ]
+            ]
+          },
+          "warned_share": 0.07111111111111112,
+          "accuracy_when_not_warned": 1.0,
+          "model_ms_median": 85.5036499851849
+        },
+        "mobilenet": {
+          "n": 450,
+          "accuracy": 0.9777777777777777,
+          "macro_precision": 0.9778868924074403,
+          "macro_recall": 0.9777777777777779,
+          "macro_f1": 0.9777161371898213,
+          "per_class": {
+            "healthy": {
+              "precision": 0.974025974025974,
+              "recall": 1.0,
+              "f1": 0.9868421052631579,
+              "support": 150
+            },
+            "early_blight": {
+              "precision": 0.9733333333333334,
+              "recall": 0.9733333333333334,
+              "f1": 0.9733333333333334,
+              "support": 150
+            },
+            "late_blight": {
+              "precision": 0.9863013698630136,
+              "recall": 0.96,
+              "f1": 0.9729729729729729,
+              "support": 150
+            }
+          },
+          "confusion_matrix": {
+            "labels": [
+              "healthy",
+              "early_blight",
+              "late_blight"
+            ],
+            "rows_true_cols_pred": [
+              [
+                150,
+                0,
+                0
+              ],
+              [
+                2,
+                146,
+                2
+              ],
+              [
+                2,
+                4,
+                144
+              ]
+            ]
+          },
+          "warned_share": 0.10888888888888892,
+          "accuracy_when_not_warned": 0.9875311720698254,
+          "model_ms_median": 5.0053499871864915
+        }
+      },
+      "mcnemar": {
+        "dinov2 vs mobilenet": {
+          "only_first_correct": 10,
+          "only_second_correct": 4,
+          "chi2": 1.786,
+          "p_value": 0.1795654296875,
+          "method": "exact binomial",
+          "significant": false
+        }
+      }
+    }
+  }
+}

@@ -53,26 +53,27 @@ export async function POST(req: Request) {
   // model_versions is a foreign key; register a version the seed didn't know about instead of failing the scan.
   await admin.from("model_versions").upsert({ version: r.model_version }, { onConflict: "version", ignoreDuplicates: true });
 
-  const { data: scan, error } = await admin
-    .from("scans")
-    .insert({
-      user_id: user.id,
-      field_id,
-      notes: notes || null,
-      image_path,
-      predicted_label: r.label,
-      confidence: r.confidence,
-      probabilities: r.probabilities,
-      severity: r.severity,
-      model_version: r.model_version,
-      model_note: r.note,
-      in_domain: r.in_domain,
-      latitude: located ? lat : null,
-      longitude: located ? lon : null,
-      weather,
-    })
-    .select("id")
-    .single();
+  const row = {
+    user_id: user.id,
+    field_id,
+    notes: notes || null,
+    image_path,
+    predicted_label: r.label,
+    confidence: r.confidence,
+    probabilities: r.probabilities,
+    severity: r.severity,
+    model_version: r.model_version,
+    model_note: r.note,
+    in_domain: r.in_domain,
+    latitude: located ? lat : null,
+    longitude: located ? lon : null,
+    weather,
+  };
+  // Leaf-area columns come from migration 0006. ML services older than it don't send them (undefined is
+  // dropped), and if the migration hasn't run yet (PGRST204: unknown column) the scan is saved without them.
+  const area = { diseased_area: r.diseased_area, severity_reliable: r.severity_reliable, lesion_mask: r.lesion_mask };
+  let { data: scan, error } = await admin.from("scans").insert({ ...row, ...area }).select("id").single();
+  if (error?.code === "PGRST204") ({ data: scan, error } = await admin.from("scans").insert(row).select("id").single());
   if (error || !scan) return fail(500, error?.message ?? "Could not save the scan");
 
   let forecast: string | null = null;
