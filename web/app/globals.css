@@ -116,8 +116,10 @@
   .field-error { @apply mt-1.5 text-sm text-late; }
 }
 
-/* First-screen elements the GSAP entrance reveals (components/motion/page-motion.tsx); keep in sync with it */
+/* First-screen elements the GSAP entrance reveals (components/motion/page-motion.tsx, auth-motion.tsx);
+   keep in sync with them */
 .motion [data-motion] > section:first-child :is(.eyebrow, h1, .lead),
+.motion [data-auth-form]:not([data-ready]) > *,
 .motion [data-intro] { visibility: hidden; }
 
 /* Leaflet sits under our sticky nav and drawers */

@@ -5,6 +5,7 @@ import { Logo } from "@/components/layout/logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import Image from "next/image";
 import { authPhoto } from "@/lib/photos";
+import { AuthMotion } from "@/components/motion/auth-motion";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -15,7 +16,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <Logo />
           <ThemeToggle />
         </div>
-        <main id="main" className="mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center py-6">
+        <main id="main" data-auth-form className="mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center py-6">
           {children}
         </main>
         <p className="text-center text-sm text-muted">
@@ -29,15 +30,15 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         </p>
       </div>
 
-      <aside className="relative hidden overflow-hidden bg-deep p-12 text-deep-ink lg:flex lg:flex-col xl:p-14">
-        <Image src={authPhoto.src} alt="" fill placeholder="blur" sizes="42vw" className="object-cover" />
+      <aside data-auth-aside className="relative hidden overflow-hidden bg-deep p-12 text-deep-ink lg:flex lg:flex-col xl:p-14">
+        <Image data-intro="photo" src={authPhoto.src} alt="" fill placeholder="blur" sizes="42vw" className="object-cover" />
         {/* Darken toward the bottom so the white text stays readable */}
         <div className="absolute inset-0 bg-gradient-to-t from-deep via-deep/75 to-deep/20" />
         <div className="relative mt-auto">
-          <p className="max-w-[18ch] font-serif text-[2.25rem] leading-[1.1] tracking-[-0.04em] xl:text-[2.5rem]">One photo. A clear next step for your field.</p>
+          <p data-intro="caption" className="max-w-[18ch] font-serif text-[2.25rem] leading-[1.1] tracking-[-0.04em] xl:text-[2.5rem]">One photo. A clear next step for your field.</p>
           <ul className="mt-8 space-y-3 text-deep-muted">
             {["Diagnosis with a confidence score", "Treatment and prevention guidance", "7-day spread forecast from local weather"].map((t) => (
-              <li key={t} className="flex items-center gap-3">
+              <li key={t} data-intro="item" className="flex items-center gap-3">
                 <span className="grid h-6 w-6 place-items-center rounded-full bg-[#7bf6d1]/15 text-[#7bf6d1]">
                   <Check className="h-3.5 w-3.5" strokeWidth={3} />
                 </span>
@@ -47,6 +48,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </ul>
         </div>
       </aside>
+      <AuthMotion />
     </div>
   );
 }

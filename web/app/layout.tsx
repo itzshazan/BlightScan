@@ -20,10 +20,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning className={`${serif.variable} ${sans.variable}`}>
       <head>
         {/* Lets globals.css hide first-screen elements until the GSAP entrance runs (components/motion/page-motion.tsx).
-            Skipped for reduced motion; if the animation code never starts, everything is shown after 4 s. */}
+            If the animation code never starts, everything is shown after 4 s. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;var d=document.documentElement;d.classList.add("motion");setTimeout(function(){if(!window.__motionReady)d.classList.remove("motion")},4000)})()`,
+            __html: `(function(){var d=document.documentElement;d.classList.add("motion");setTimeout(function(){if(!window.__motionReady)d.classList.remove("motion")},4000)})()`,
           }}
         />
       </head>

@@ -1,8 +1,9 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useAuthEntrance } from "@/components/motion/auth-motion";
 import { useAuth } from "@/lib/auth";
 import { safeRedirect } from "@/lib/utils";
 
@@ -63,8 +64,10 @@ export function Divider({ children = "or continue with" }) {
 }
 
 export function AuthHeading({ title, body }: { title: string; body?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useAuthEntrance(ref);
   return (
-    <div className="mb-6">
+    <div ref={ref} className="mb-6">
       <h1 className="font-serif text-[2.25rem] font-normal leading-[1.1] tracking-[-0.04em] md:text-[2.5rem]">{title}</h1>
       {body && <p className="mt-2.5 text-[15px] text-muted">{body}</p>}
     </div>

@@ -77,12 +77,7 @@ export function Navbar({ app = false }: { app?: boolean }) {
           {!ready ? (
             <div className="h-10 w-40" />
           ) : authed ? (
-            <>
-              <Button href="/scan" variant="accent" size="md" className="hidden sm:inline-flex">
-                <Plus className="h-4 w-4" /> New Scan
-              </Button>
-              <UserMenu />
-            </>
+            <UserMenu />
           ) : (
             <div className="hidden items-center gap-2 sm:flex">
               <Button href="/login" variant="outline">

@@ -39,11 +39,10 @@ export function PageMotion() {
       if (!root) return;
       const mm = gsap.matchMedia();
 
-      mm.add("(prefers-reduced-motion: reduce)", () => {
-        document.documentElement.classList.remove("motion");
-      });
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
+      // Entrances, reveals and counters play for everyone. With reduced motion on (often switched off at the
+      // OS level without the visitor knowing), only the endless dot pulse and scroll-linked drift are skipped.
+      mm.add({ calm: "(prefers-reduced-motion: reduce)", full: "(prefers-reduced-motion: no-preference)" }, (ctx) => {
+        const calm = !!ctx.conditions?.calm;
         const intro = root.querySelector<HTMLElement>(":scope > section:first-child");
         const nested = (el: Element) => !!el.parentElement?.closest("[data-reveal]");
         const inIntro = (el: Element) => !!intro?.contains(el);
@@ -68,14 +67,14 @@ export function PageMotion() {
         const photo = q("[data-intro='photo']");
         if (photo.length) {
           const dots = q("[data-intro='dot']");
-          gsap
+          const tl = gsap
             .timeline({ delay: 0.2 })
             .fromTo(photo, { autoAlpha: 0, scale: 1.06, clipPath: "inset(10% 10% 10% 10% round 28px)" }, { autoAlpha: 1, scale: 1, clipPath: "inset(0% 0% 0% 0% round 28px)", duration: 1.4, ease: "expo.out" })
             .fromTo(dots, { autoAlpha: 0, scale: 0 }, { autoAlpha: 1, scale: 1, duration: 0.5, stagger: 0.15, ease: "back.out(3)" }, 0.7)
             .fromTo(q("[data-intro='line']"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, stagger: 0.15 }, 0.9)
             .fromTo(q("[data-intro='loupe']"), { autoAlpha: 0, scale: 0.3 }, { autoAlpha: 1, scale: 1, duration: 0.9, ease: "back.out(1.5)" }, 1)
-            .fromTo(q("[data-intro='label']"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, stagger: 0.12 }, 1.4)
-            .to(dots, { scale: 1.3, duration: 1.1, repeat: -1, yoyo: true, ease: "sine.inOut" });
+            .fromTo(q("[data-intro='label']"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, stagger: 0.12 }, 1.4);
+          if (!calm) tl.to(dots, { scale: 1.3, duration: 1.1, repeat: -1, yoyo: true, ease: "sine.inOut" });
         }
 
         // 2 · Headings and blocks further down
@@ -130,7 +129,7 @@ export function PageMotion() {
         });
 
         // 5 · Gentle drift on product screenshots
-        q("[data-parallax]").forEach((el) => {
+        if (!calm) q("[data-parallax]").forEach((el) => {
           gsap.fromTo(el, { y: 40 }, { y: -20, ease: "none", scrollTrigger: { trigger: el.parentElement, start: "top bottom", end: "bottom top", scrub: true } });
         });
 
