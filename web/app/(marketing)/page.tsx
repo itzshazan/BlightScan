@@ -54,7 +54,9 @@ export default function HomePage() {
           <div>
             <p className="eyebrow">AI-assisted tomato crop monitoring</p>
             <h1 className="display-1 mt-5 max-w-[12ch]">Catch tomato blight before it spreads.</h1>
-            <p className="lead mt-6 max-w-[34ch]">Snap a leaf photo. Get a diagnosis in seconds and a 7-day spread forecast for your field.</p>
+            <p className="lead mt-6 max-w-[34ch]">
+              Snap a photo of one tomato leaf. In seconds you get a diagnosis with a confidence score, clear treatment steps and a 7-day spread forecast for your field.
+            </p>
             <div data-intro="text" className="mt-9 flex flex-wrap gap-3">
               <ScanCTA />
               <Button href="#how-it-works" variant="outline" size="lg">
