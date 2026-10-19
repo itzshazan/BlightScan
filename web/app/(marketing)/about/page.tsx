@@ -14,7 +14,7 @@ const stack: [string, string, string][] = [
   ["Model service", "FastAPI, ONNX Runtime", "Runs the classifier and the spread forecast"],
   ["Model", "DINOv2-small, PlantVillage", "Pretrained leaf-disease classifier, int8"],
   ["Weather", "Open-Meteo", "Hourly temperature, humidity and rain"],
-  ["Hosting", "Vercel, Hugging Face Spaces", "Website and model service"],
+  ["Hosting", "Vercel, Render", "Website and model service"],
 ];
 
 export default function AboutPage() {

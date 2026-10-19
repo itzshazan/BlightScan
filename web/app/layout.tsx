@@ -6,7 +6,7 @@ import { Providers } from "./providers";
 
 // Harvest pairs Besley (display serif) with Muoto (grotesk). Figtree is the closest free grotesk.
 const serif = Besley({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-serif", display: "swap" });
-const sans = Figtree({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans", display: "swap" });
+const sans = Figtree({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-sans", display: "swap" });
 
 export const metadata = {
   title: { default: "BlightScan: tomato blight detection", template: "%s · BlightScan" },

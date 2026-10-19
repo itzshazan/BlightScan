@@ -9,7 +9,7 @@ export const site = {
   university: "Manav Rachna University",
   universityAddress: "Sector 43, Aravalli Hills, Delhi–Surajkund Road, Faridabad, Haryana 121004",
   datasetUrl: "https://github.com/spMohanty/PlantVillage-Dataset",
-  student: { name: "Shazan Khan", roll: "[Roll no.]", program: "B.Tech CSE (AI & ML)" },
+  student: { name: "Shazan Khan", roll: "2K24CSUN01301", program: "B.Tech CSE (AI & ML)" },
   guide: { name: "Pooja Parmar", department: "Education Department" },
   legalUpdated: "18 October 2026",
 };

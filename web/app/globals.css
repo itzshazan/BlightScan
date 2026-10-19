@@ -74,6 +74,9 @@
     font-size: clamp(2.6rem, 2rem + 3.4vw, 4.375rem);
     line-height: 1.08;
     letter-spacing: -0.04em;
+    /* Optical alignment: Besley capitals start ~0.03–0.05em in from their box at this size, so the
+       heading looked indented next to the eyebrow above it. Centred headings use mx-auto, which wins. */
+    margin-left: -0.04em;
   }
   /* Harvest: 50px / 1.1 / -2px */
   .display-2 {
