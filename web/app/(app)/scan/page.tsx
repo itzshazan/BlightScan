@@ -143,9 +143,10 @@ function ScanForm() {
               </Button>
             </div>
             {/* Live weather at the scan location: field pin, else the phone's GPS */}
-            <div className="mt-5 flex items-start gap-3 rounded-2xl bg-sunken px-4 py-3.5 text-[15px]">
+            {/* Phones: button drops under the text (2nd column); sm+: it sits on the right */}
+            <div className="mt-5 grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-3 rounded-2xl bg-sunken px-4 py-3.5 text-[15px] sm:grid-cols-[auto_minmax(0,1fr)_auto]">
               <CloudSun className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0">
                 <p className="font-medium">Live weather</p>
                 {fieldHasPin ? (
                   <p className="text-muted">Humidity and rainfall at {selected!.name} will be saved with this scan and used for the spread forecast.</p>
@@ -164,7 +165,7 @@ function ScanForm() {
                 )}
               </div>
               {!fieldHasPin && geo.state !== "ok" && (
-                <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={locate} disabled={geo.state === "locating"}>
+                <Button type="button" variant="outline" size="sm" className="col-start-2 justify-self-start sm:col-start-auto" onClick={locate} disabled={geo.state === "locating"}>
                   {geo.state === "locating" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MapPin className="h-3.5 w-3.5" />}
                   {geo.state === "denied" || geo.state === "unavailable" ? "Try again" : "Use my location"}
                 </Button>
