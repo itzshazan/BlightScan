@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Crumbs, Skeleton } from "@/components/ui/misc";
 import { getByLabel } from "@/lib/diseases";
-import { LABELS, affectedArea, formatDateTime } from "@/lib/format";
+import { LABELS, affectedArea, formatDateTime, isUnclear } from "@/lib/format";
 import { deleteScans, effectiveLabel, reviewScan, scanSpread, useDB } from "@/lib/store";
 import { ScanConditions } from "@/components/app/scan-conditions";
 import { downloadScanReport } from "@/lib/report";
@@ -42,7 +42,9 @@ export default function ScanResultPage({ params }: { params: { id: string } }) {
   const field = db.fields.find((f) => f.id === scan.field_id);
   const label = effectiveLabel(scan);
   const info = getByLabel(label);
-  const diseased = label !== "healthy";
+  // Failed the single-leaf check and not reviewed: show the model's label only as a guess
+  const unclear = isUnclear(scan);
+  const diseased = label !== "healthy" && !unclear;
   const spread = diseased ? scanSpread(db, scan) : null;
   const low = scan.confidence < 60;
   const severity = { low: "Low", moderate: "Moderate", high: "High" }[scan.severity];
@@ -82,22 +84,35 @@ export default function ScanResultPage({ params }: { params: { id: string } }) {
             )}
           </div>
           <div className="flex flex-col p-6 md:p-8">
-            <p className="text-sm text-muted">{scan.expert_label ? "Expert-reviewed diagnosis" : "Model diagnosis"}</p>
-            <p className={`mt-1 font-serif text-[2.75rem] leading-none tracking-[-0.04em] md:text-[3.5rem] ${tone[label]}`}>{LABELS[label]}</p>
+            {unclear ? (
+              <>
+                <p className="text-sm text-muted">Unclear photo</p>
+                <p className="mt-1 font-serif text-[2.25rem] leading-[1.05] tracking-[-0.04em] md:text-[2.75rem]">Can&apos;t tell from this photo</p>
+                <p className="mt-4 text-[15px] text-muted">
+                  The model&apos;s best guess was {LABELS[scan.predicted_label].toLowerCase()} ({scan.confidence}%), but it isn&apos;t reliable on photos like this, so
+                  it isn&apos;t shown as a diagnosis.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted">{scan.expert_label ? "Expert-reviewed diagnosis" : "Model diagnosis"}</p>
+                <p className={`mt-1 font-serif text-[2.75rem] leading-none tracking-[-0.04em] md:text-[3.5rem] ${tone[label]}`}>{LABELS[label]}</p>
 
-            <div className="mt-8">
-              <div className="flex items-baseline justify-between">
-                <span className="text-sm text-muted">Confidence</span>
-                <span className="text-2xl font-semibold tracking-[-0.02em]">{scan.confidence}%</span>
-              </div>
-              <div className="mt-2 h-3 overflow-hidden rounded-full bg-ink/10" role="meter" aria-valuenow={scan.confidence} aria-valuemin={0} aria-valuemax={100} aria-label="Confidence">
-                <div className={`h-full rounded-full ${bar[scan.predicted_label]}`} style={{ width: `${scan.confidence}%` }} />
-              </div>
-            </div>
+                <div className="mt-8">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-sm text-muted">Confidence</span>
+                    <span className="text-2xl font-semibold tracking-[-0.02em]">{scan.confidence}%</span>
+                  </div>
+                  <div className="mt-2 h-3 overflow-hidden rounded-full bg-ink/10" role="meter" aria-valuenow={scan.confidence} aria-valuemin={0} aria-valuemax={100} aria-label="Confidence">
+                    <div className={`h-full rounded-full ${bar[scan.predicted_label]}`} style={{ width: `${scan.confidence}%` }} />
+                  </div>
+                </div>
+              </>
+            )}
 
             <dl className="mt-8 grid grid-cols-3 gap-3 text-sm">
               {[
-                ["Severity", diseased ? severity : "None", area != null ? `${area}% of leaf` : null],
+                ["Severity", unclear ? "—" : diseased ? severity : "None", area != null ? `${area}% of leaf` : null],
                 ["Date", new Date(scan.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" }), null],
                 ["Field", field?.name ?? "—", null],
               ].map(([k, v, sub]) => (
@@ -123,7 +138,7 @@ export default function ScanResultPage({ params }: { params: { id: string } }) {
               <div className="mt-6 flex gap-3 rounded-2xl border border-early/30 bg-early-soft p-4 text-sm" role="alert">
                 <TriangleAlert className="h-5 w-5 shrink-0 text-early" />
                 <div className="space-y-1">
-                  {low && (
+                  {low && !unclear && (
                     <p>
                       <span className="font-semibold">We&apos;re not sure.</span> Retake the photo in better light or ask an expert.
                     </p>
@@ -171,18 +186,25 @@ export default function ScanResultPage({ params }: { params: { id: string } }) {
           {/* 4 · What this means */}
           <section className="card p-6">
             <h2 className="font-medium">What this result means</h2>
-            <p className="mt-4 text-[15px] leading-relaxed text-muted">{info.summary}</p>
-            {info.slug && (
+            {unclear ? (
+              <p className="mt-4 text-[15px] leading-relaxed text-muted">
+                The model learned from close-up photos of single leaves on a plain background. Shoots, several leaves, busy or blurred backgrounds and leaves still on the
+                plant can make it guess wrongly, often towards late blight. Retake the photo, or request an expert review of this one.
+              </p>
+            ) : (
+              <p className="mt-4 text-[15px] leading-relaxed text-muted">{info.summary}</p>
+            )}
+            {info.slug && !unclear && (
               <Link href={`/diseases/${info.slug}`} className="mt-4 inline-block text-[15px] font-semibold text-accent hover:underline">
                 Read the {info.name} guide →
               </Link>
             )}
-            {!diseased && <p className="mt-4 text-sm text-muted">A healthy result means no blight was detected on this leaf. It does not rule out other problems.</p>}
+            {!diseased && !unclear && <p className="mt-4 text-sm text-muted">A healthy result means no blight was detected on this leaf. It does not rule out other problems.</p>}
           </section>
         </div>
 
         {/* Live weather at the scan location */}
-        {scan.weather && <ScanConditions weather={scan.weather} label={label} />}
+        {scan.weather && !unclear && <ScanConditions weather={scan.weather} label={label} />}
 
         {/* 6 · Spread forecast */}
         {diseased && (
@@ -207,7 +229,23 @@ export default function ScanResultPage({ params }: { params: { id: string } }) {
         {/* 5 · Recommended actions */}
         <section className="card p-6">
           <h2 className="mb-5 font-medium">Recommended next steps</h2>
-          <TreatmentTabs organic={info.treatment_organic} chemical={info.treatment_chemical} />
+          {unclear ? (
+            <ul className="space-y-2 text-[15px] text-muted">
+              {[
+                "Pick one leaf and fill most of the frame with it.",
+                "Put it on a plain background: paper, cloth or your palm.",
+                "Use daylight without harsh shadows, and hold the phone steady so the leaf is sharp.",
+                "Photograph the leaf showing the spots, not the whole plant.",
+              ].map((t) => (
+                <li key={t} className="flex gap-2">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <TreatmentTabs organic={info.treatment_organic} chemical={info.treatment_chemical} />
+          )}
         </section>
 
         {scan.notes && (

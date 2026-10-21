@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Input, Select } from "@/components/ui/field";
 import { EmptyState, PageHeader, Skeleton } from "@/components/ui/misc";
-import { LABELS, affectedArea, formatDate } from "@/lib/format";
+import { LABELS, affectedArea, formatDate, isUnclear } from "@/lib/format";
 import { deleteScans, effectiveLabel, useDB } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { supabaseEnabled } from "@/lib/supabase/env";
@@ -26,7 +26,7 @@ function toCSV(rows: Scan[], fields: Field[]) {
   const head = ["id", "date", "result", "model_label", "confidence", "severity", "diseased_area_pct", "field", "review_status", "notes"];
   const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const lines = rows.map((s) =>
-    [s.id, s.created_at, LABELS[effectiveLabel(s)], LABELS[s.predicted_label], s.confidence, s.severity, affectedArea(s), fields.find((f) => f.id === s.field_id)?.name ?? "", s.review_status, s.notes]
+    [s.id, s.created_at, isUnclear(s) ? "Unclear photo" : LABELS[effectiveLabel(s)], LABELS[s.predicted_label], s.confidence, s.severity, affectedArea(s), fields.find((f) => f.id === s.field_id)?.name ?? "", s.review_status, s.notes]
       .map(esc)
       .join(",")
   );
@@ -209,7 +209,7 @@ function History() {
                     </Link>
                   </td>
                   <td className="p-4">
-                    <ResultBadge label={effectiveLabel(s)} />
+                    <ResultBadge label={effectiveLabel(s)} unclear={isUnclear(s)} />
                     {s.review_status === "requested" && <span className="ml-2 text-xs text-muted">Review requested</span>}
                   </td>
                   <td className={cn("p-4 font-semibold", s.confidence < 60 && "text-early")}>{s.confidence}%</td>
@@ -241,7 +241,7 @@ function History() {
                 </div>
                 <div className="p-4">
                   <div className="flex items-center justify-between gap-2">
-                    <ResultBadge label={effectiveLabel(s)} />
+                    <ResultBadge label={effectiveLabel(s)} unclear={isUnclear(s)} />
                     <span className="text-sm font-semibold">{s.confidence}%</span>
                   </div>
                   <p className="mt-2 truncate text-sm text-muted">

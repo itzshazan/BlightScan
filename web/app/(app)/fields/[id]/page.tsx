@@ -13,7 +13,7 @@ import { ResultBadge, RiskBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Crumbs, PageHeader, Skeleton } from "@/components/ui/misc";
-import { relativeDay } from "@/lib/format";
+import { isUnclear, relativeDay } from "@/lib/format";
 import { deleteField, effectiveLabel, fieldScans, latestSpread, runFieldForecast, updateField, useDB } from "@/lib/store";
 
 function FieldDetail({ id }: { id: string }) {
@@ -162,7 +162,7 @@ function FieldDetail({ id }: { id: string }) {
                     <span className="h-12 w-12 shrink-0 overflow-hidden rounded-xl">
                       <ScanImage scan={s} />
                     </span>
-                    <ResultBadge label={effectiveLabel(s)} />
+                    <ResultBadge label={effectiveLabel(s)} unclear={isUnclear(s)} />
                     <span className="text-sm font-semibold">{s.confidence}%</span>
                     <span className="ml-auto text-sm text-muted">{relativeDay(s.created_at)}</span>
                   </Link>

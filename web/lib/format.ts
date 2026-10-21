@@ -14,6 +14,15 @@ export const RISK_MESSAGES: Record<RiskLevel, string> = {
   high: "High risk of spread. Remove infected leaves and treat now.",
 };
 
+/**
+ * The photo failed the single-leaf check and no expert has labelled it, so the model's label is only a
+ * guess (on such photos it often says late blight for a healthy leaf). Unclear scans aren't shown as a
+ * diagnosis, aren't counted as diseased and don't drive spread forecasts.
+ */
+export function isUnclear(scan: Pick<Scan, "in_domain" | "expert_label">): boolean {
+  return scan.in_domain === false && !scan.expert_label;
+}
+
 /** Measured diseased leaf area, e.g. 23.5; null when there's no trustworthy measurement. */
 export function affectedArea(scan: Pick<Scan, "diseased_area" | "severity_reliable">): number | null {
   return scan.severity_reliable && scan.diseased_area != null ? Number(scan.diseased_area) : null;

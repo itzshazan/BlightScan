@@ -23,7 +23,14 @@ export function Badge({ className, children, dot, tone = "bg-ink/5 text-ink" }: 
   );
 }
 
-export function ResultBadge({ label, className }: { label: DiseaseLabel; className?: string }) {
+/** `unclear`: the photo failed the single-leaf check, so the label is only a guess (see isUnclear). */
+export function ResultBadge({ label, unclear, className }: { label: DiseaseLabel; unclear?: boolean; className?: string }) {
+  if (unclear)
+    return (
+      <Badge dot tone="bg-ink/5 text-muted" className={className}>
+        Unclear photo
+      </Badge>
+    );
   return (
     <Badge dot tone={labelTone[label]} className={className}>
       {LABELS[label]}

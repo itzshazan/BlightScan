@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { affectedArea } from "@/lib/format";
+import { affectedArea, isUnclear } from "@/lib/format";
 import { fail, requireUser } from "@/lib/server/session";
 
 const LABEL: Record<string, string> = { healthy: "Healthy", early_blight: "Early Blight", late_blight: "Late Blight" };
@@ -39,7 +39,7 @@ export async function GET(req: Request) {
   const head = ["id", "date", "result", "model_label", "confidence", "severity", "diseased_area_pct", "field", "review_status", "notes"];
   const lines = rows.map((r) => {
     const f = r.fields as unknown as { name: string } | null;
-    return [r.id, r.created_at, LABEL[r.expert_label ?? r.predicted_label], LABEL[r.predicted_label], r.confidence, r.severity, affectedArea(r), f?.name ?? "", r.review_status, r.notes]
+    return [r.id, r.created_at, isUnclear(r) ? "Unclear photo" : LABEL[r.expert_label ?? r.predicted_label], LABEL[r.predicted_label], r.confidence, r.severity, affectedArea(r), f?.name ?? "", r.review_status, r.notes]
       .map(esc)
       .join(",");
   });

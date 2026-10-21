@@ -10,7 +10,7 @@ import { ResultBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState, Skeleton, SkeletonCards } from "@/components/ui/misc";
 import { effectiveLabel, latestSpread, useDB } from "@/lib/store";
-import { greeting, relativeDay } from "@/lib/format";
+import { greeting, isUnclear, relativeDay } from "@/lib/format";
 
 const WEEK = 7 * 86400000;
 
@@ -25,7 +25,7 @@ function weekly(scans: Scan[]): WeekRow[] {
       return t >= from && t < from + WEEK;
     });
     const row: WeekRow = { week: new Date(from).toLocaleDateString("en-IN", { day: "numeric", month: "short" }), healthy: 0, early_blight: 0, late_blight: 0 };
-    inWeek.forEach((s) => row[effectiveLabel(s)]++);
+    inWeek.forEach((s) => !isUnclear(s) && row[effectiveLabel(s)]++);
     return row;
   });
 }
@@ -45,14 +45,15 @@ export default function DashboardPage() {
   const data = useMemo(() => {
     if (!db) return null;
     const scans = [...db.scans].sort((a, b) => b.created_at.localeCompare(a.created_at));
-    const diseased = scans.filter((s) => effectiveLabel(s) !== "healthy");
+    // Unclear photos (failed the single-leaf check, not reviewed) count as scans but not as a result
+    const diseased = scans.filter((s) => !isUnclear(s) && effectiveLabel(s) !== "healthy");
     const high = db.fields.filter((f) => f.current_risk === "high");
     const alerts = db.fields
       .map((f) => ({ field: f, sp: latestSpread(db, f.id) }))
       .filter((a): a is { field: Field; sp: SpreadPrediction } => !!a.sp && a.field.current_risk !== "low" && Date.now() - new Date(a.sp.created_at).getTime() < WEEK)
       .sort((a, b) => b.sp.risk_score - a.sp.risk_score);
     const counts: Record<DiseaseLabel, number> = { healthy: 0, early_blight: 0, late_blight: 0 };
-    scans.forEach((s) => counts[effectiveLabel(s)]++);
+    scans.forEach((s) => !isUnclear(s) && counts[effectiveLabel(s)]++);
     return { scans, diseased, high, alerts, counts, weeks: weekly(scans), defaultField: db.fields.find((f) => f.latitude != null) };
   }, [db]);
 
@@ -196,7 +197,7 @@ export default function DashboardPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <ResultBadge label={effectiveLabel(s)} />
+                          <ResultBadge label={effectiveLabel(s)} unclear={isUnclear(s)} />
                           <span className="text-sm font-semibold">{s.confidence}%</span>
                         </div>
                         <p className="mt-1 truncate text-sm text-muted">{field?.name ?? "No field"}</p>

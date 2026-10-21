@@ -1,5 +1,6 @@
 // Shared by POST /api/scans and POST /api/fields/[id]/forecast.
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { isUnclear } from "@/lib/format";
 import type { DiseaseLabel, Severity } from "@/lib/types";
 import { mlSpread, type MlSpread } from "./ml";
 
@@ -35,11 +36,11 @@ export async function runSpreadForecast(admin: SupabaseClient, fieldId: string):
 
   const { data: scans } = await admin
     .from("scans")
-    .select("id, predicted_label, expert_label, severity, created_at")
+    .select("id, predicted_label, expert_label, in_domain, severity, created_at")
     .eq("field_id", fieldId)
     .order("created_at", { ascending: false })
     .limit(50);
-  const diseased = (scans ?? []).filter((s) => (s.expert_label ?? s.predicted_label) !== "healthy");
+  const diseased = (scans ?? []).filter((s) => !isUnclear(s) && (s.expert_label ?? s.predicted_label) !== "healthy");
   const latest = diseased[0];
   if (!latest) return { ok: false, reason: "no-diseased-scan" };
 

@@ -134,7 +134,7 @@ export default function HowItWorksPage() {
 
           <div>
             <p className="eyebrow">Model</p>
-            <h2 className="display-2 mt-6">Pretrained, not retrained.</h2>
+            <h2 className="display-2 mt-6">Pretrained Model with retraning and fine-tuning.</h2>
             <p className="mt-5 max-w-[46ch] text-[17px] text-muted">
               BlightScan runs an openly published model and keeps only the tomato classes it needs. When a leaf looks more like another disease, the confidence drops and the
               result says why.

@@ -77,7 +77,8 @@ export async function POST(req: Request) {
   if (error || !scan) return fail(500, error?.message ?? "Could not save the scan");
 
   let forecast: string | null = null;
-  if (r.label !== "healthy" && located) {
+  // No forecast from a photo that failed the single-leaf check: its label is only a guess
+  if (r.label !== "healthy" && r.in_domain && located) {
     try {
       if (field?.latitude != null) {
         const f = await runSpreadForecast(admin, field.id);

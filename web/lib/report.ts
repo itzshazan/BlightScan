@@ -1,6 +1,6 @@
 "use client";
 // Download Report (PDF), generated client-side with jsPDF (spec 4.9).
-import { LABELS, RISK_LABELS, affectedArea, formatDateTime } from "./format";
+import { LABELS, RISK_LABELS, affectedArea, formatDateTime, isUnclear } from "./format";
 import { getByLabel } from "./diseases";
 import type { DiseaseLabel, Field, Scan, SpreadPrediction } from "./types";
 
@@ -58,11 +58,12 @@ export async function downloadScanReport({ scan, field, spread, label }: ReportI
   doc.text("Diagnosis", x, y + 10);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
-  doc.text(LABELS[label], x, y + 40);
+  const unclear = isUnclear(scan);
+  doc.text(unclear ? "Unclear photo" : LABELS[label], x, y + 40);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
   const lines = [
-    `Confidence: ${scan.confidence}%`,
+    unclear ? `Model's best guess: ${LABELS[scan.predicted_label]} (${scan.confidence}%), not reliable on this photo` : `Confidence: ${scan.confidence}%`,
     `Severity: ${scan.severity}${affectedArea(scan) != null ? ` (about ${affectedArea(scan)}% of the leaf affected)` : ""}`,
     `Field: ${field?.name ?? "No field"}`,
     `Model: ${scan.model_version}`,
@@ -108,9 +109,17 @@ export async function downloadScanReport({ scan, field, spread, label }: ReportI
     });
     y += 12;
   };
-  section("Organic & cultural", info.treatment_organic);
-  section("Chemical options", info.treatment_chemical);
-  if (info.prevention) section("Prevention", info.prevention);
+  if (unclear) {
+    section("Retake the photo", [
+      "Pick one leaf and fill most of the frame with it.",
+      "Put it on a plain background: paper, cloth or your palm.",
+      "Use daylight without harsh shadows, and hold the phone steady so the leaf is sharp.",
+    ]);
+  } else {
+    section("Organic & cultural", info.treatment_organic);
+    section("Chemical options", info.treatment_chemical);
+    if (info.prevention) section("Prevention", info.prevention);
+  }
 
   doc.setFontSize(8);
   doc.setTextColor(82, 107, 99);

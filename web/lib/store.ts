@@ -9,6 +9,7 @@ import { demoPredict } from "./predict";
 import { predictSpread, type SpreadResult } from "./spread";
 import { supabaseEnabled } from "./supabase/env";
 import { uuid } from "./utils";
+import { isUnclear } from "./format";
 import { getForecast, getSnapshot, type Forecast } from "./weather";
 import type { Coords } from "./geo";
 import * as remote from "./remote";
@@ -252,7 +253,7 @@ export async function runFieldForecast(field: Field): Promise<ForecastOutcome> {
   }
   if (field.latitude == null || field.longitude == null) return { ok: false, reason: "no-location" };
   const db = loadDemo();
-  const scans = db.scans.filter((s) => s.field_id === field.id && effectiveLabel(s) !== "healthy").sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const scans = db.scans.filter((s) => s.field_id === field.id && !isUnclear(s) && effectiveLabel(s) !== "healthy").sort((a, b) => b.created_at.localeCompare(a.created_at));
   const latest = scans[0];
   if (!latest) return { ok: false, reason: "no-diseased-scan" };
 
